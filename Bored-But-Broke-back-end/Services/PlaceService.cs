@@ -20,12 +20,7 @@ namespace Bored_But_Broke_back_end.Services
 
             var response = await _yelpClient.GetPlacesAsync(query, token);
 
-            if (response != null)
-            {
-                return response.ToPlaces();
-            }
-
-            return [];
+            return response.ToPlaces();
         }
     }
 }

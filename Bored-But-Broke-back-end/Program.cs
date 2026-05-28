@@ -1,5 +1,6 @@
 
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
+using Bored_But_Broke_back_end.Middlewares;
 using Bored_But_Broke_back_end.Services;
 using System.Net.Http.Headers;
 
@@ -13,7 +14,10 @@ namespace Bored_But_Broke_back_end
 
             builder.Services.AddScoped<IPlaceService, PlaceService>();
             builder.Services.AddScoped<IYelpClient, YelpClient>();
-           
+
+            builder.Services.AddExceptionHandler<ExceptionHandler>();
+            builder.Services.AddProblemDetails();
+
             builder.Services.AddHttpClient<IYelpClient, YelpClient>(client =>
             {
                 string _baseURL = "https://api.yelp.com/v3/";
@@ -32,6 +36,8 @@ namespace Bored_But_Broke_back_end
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            app.UseExceptionHandler();
 
             if (app.Environment.IsDevelopment())
             {
