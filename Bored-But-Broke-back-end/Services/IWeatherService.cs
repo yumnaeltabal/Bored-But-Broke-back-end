@@ -2,6 +2,6 @@
 {
     public interface IWeatherService
     {
-
+        Task<object> GetWeatherAndForwardAsync(WeatherRequest request);
     }
 }

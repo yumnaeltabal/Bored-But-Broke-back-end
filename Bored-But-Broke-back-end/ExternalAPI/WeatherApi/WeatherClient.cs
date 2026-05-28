@@ -3,4 +3,9 @@
     public interface IWeatherClient
     {
     }
+    public class WeatherClient : IWeatherClient 
+    {
+
+    }
+
 }
