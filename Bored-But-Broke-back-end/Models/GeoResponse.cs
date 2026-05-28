@@ -2,7 +2,7 @@
 {
     public class GeoResponse
     {
-        public GeoResult[] result { get; set; }
+        public GeoResult[] results { get; set; }
     }
     public class GeoResult
     {
