@@ -4,6 +4,6 @@ namespace Bored_But_Broke_back_end.Services
 {
     public interface IWeatherService
     {
-        Task<WeatherResult> GetWeatherAndForwardAsync(WeatherRequest request);
+        Task<List<WeatherHourlyResult>> GetWeatherAndForwardAsync(WeatherRequest request);
     }
 }
