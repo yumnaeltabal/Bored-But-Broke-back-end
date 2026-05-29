@@ -1,5 +1,6 @@
 ﻿using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.Models;
+using Bored_But_Broke_back_end.Models.Queries;
 using Microsoft.Extensions.Primitives;
 
 namespace Bored_But_Broke_back_end.Services
@@ -11,14 +12,14 @@ namespace Bored_But_Broke_back_end.Services
         { 
             _yelpClient = yelpClient;
         }
-        public async Task<List<Place>> GetPlacesAsync(CancellationToken token)
+        public async Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken token)
         {
-            var query = new Dictionary<string, StringValues>();
+            // TODO: Convert location to coordinates
+            var queryParams = new Dictionary<string, StringValues>();
+            queryParams.Add("location", query.Location);
+            queryParams.Add("limit", query.Limit.ToString());
 
-            query.TryAdd("location", "London");
-            query.TryAdd("limit", "50");
-
-            var response = await _yelpClient.GetPlacesAsync(query, token);
+            var response = await _yelpClient.GetPlacesAsync(queryParams, token);
 
             return response.ToPlaces();
         }

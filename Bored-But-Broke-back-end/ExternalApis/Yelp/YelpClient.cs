@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Primitives;
 using System.Net;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bored_But_Broke_back_end.ExternalApis.Yelp
 {
@@ -37,13 +36,9 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp
             {
                 throw new HttpRequestException("Couldn't connect to Yelp API.", ex);
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException ex)
             {
-                throw new ExternalApiException(
-                    statusCode: HttpStatusCode.GatewayTimeout,
-                    errorTitle: "Gateway Timeout",
-                    errorDetail: "Yelp API failed to respond in time."
-                );
+                throw new TaskCanceledException("Yelp API failed to respond in time.", ex);
             }
 
             string responseBody = await response.Content.ReadAsStringAsync(token);

@@ -15,18 +15,21 @@ namespace Bored_But_Broke_back_end.Middlewares
                 Status = exception switch
                 {
                     HttpRequestException => StatusCodes.Status502BadGateway,
+                    TaskCanceledException => StatusCodes.Status504GatewayTimeout,
                     ExternalApiException => (int?)((ExternalApiException)exception).StatusCode,
                     _ => StatusCodes.Status500InternalServerError
                 },
                 Title = exception switch
                 {
                     HttpRequestException => "Bad Gateway",
+                    TaskCanceledException => "Gateway Timeout",
                     ExternalApiException => ((ExternalApiException)exception).ErrorTitle,
                     _ => "Internal Server Error"
                 },
                 Detail = exception switch
                 {
                     HttpRequestException => exception.Message,
+                    TaskCanceledException => exception.Message,
                     ExternalApiException => ((ExternalApiException)exception).ErrorDetail,
                     _ => "Please try again later."
                 }

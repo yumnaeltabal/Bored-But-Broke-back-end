@@ -1,4 +1,5 @@
-﻿using Bored_But_Broke_back_end.Services;
+﻿using Bored_But_Broke_back_end.Models.Queries;
+using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bored_But_Broke_back_end.Controllers
@@ -15,9 +16,9 @@ namespace Bored_But_Broke_back_end.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPlacesAsync(CancellationToken token)
+        public async Task<IActionResult> GetPlacesAsync([FromQuery] GetPlacesQuery query, CancellationToken token)
         {
-            var result = await _placeService.GetPlacesAsync(token);
+            var result = await _placeService.GetPlacesAsync(query, token);
 
             return Ok(result);
         }
