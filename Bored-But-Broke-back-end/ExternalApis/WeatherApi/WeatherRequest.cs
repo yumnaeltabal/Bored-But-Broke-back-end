@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace Bored_But_Broke_back_end.Models
+﻿namespace Bored_But_Broke_back_end.ExternalApis.WeatherApi
 {
     public class WeatherRequest
     {

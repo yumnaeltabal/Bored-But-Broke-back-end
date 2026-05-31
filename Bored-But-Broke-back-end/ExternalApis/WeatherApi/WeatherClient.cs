@@ -1,6 +1,4 @@
-﻿using Bored_But_Broke_back_end.Models;
-
-namespace Bored_But_Broke_back_end.ExternalAPI.WeatherApi
+﻿namespace Bored_But_Broke_back_end.ExternalApis.WeatherApi
 {
     public interface IWeatherClient
     {

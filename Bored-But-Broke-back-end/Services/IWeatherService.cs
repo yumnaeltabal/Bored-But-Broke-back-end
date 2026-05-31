@@ -1,4 +1,4 @@
-﻿using Bored_But_Broke_back_end.Models;
+﻿using Bored_But_Broke_back_end.ExternalApis.WeatherApi;
 
 namespace Bored_But_Broke_back_end.Services
 {

@@ -1,5 +1,4 @@
-﻿using Bored_But_Broke_back_end.ExternalAPI.WeatherApi;
-using Bored_But_Broke_back_end.Models;
+﻿using Bored_But_Broke_back_end.ExternalApis.WeatherApi;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
