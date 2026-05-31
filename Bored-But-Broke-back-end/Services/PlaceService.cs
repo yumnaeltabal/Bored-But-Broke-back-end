@@ -15,8 +15,12 @@ namespace Bored_But_Broke_back_end.Services
         public async Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken token)
         {
             // TODO: Convert location to coordinates
+            // TODO: add categories in query
+
             var queryParams = new Dictionary<string, StringValues>();
             queryParams.Add("location", query.Location);
+            queryParams.Add("radius", query.Radius.ToString());
+            queryParams.Add("price", String.Join(",", query.Budget.Cast<int>()));
             queryParams.Add("limit", query.Limit.ToString());
 
             var response = await _yelpClient.GetPlacesAsync(queryParams, token);

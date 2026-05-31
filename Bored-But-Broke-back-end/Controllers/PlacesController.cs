@@ -18,6 +18,16 @@ namespace Bored_But_Broke_back_end.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPlacesAsync([FromQuery] GetPlacesQuery query, CancellationToken token)
         {
+            if (query.StartTime > query.EndTime)
+            {
+                ModelState.AddModelError(nameof(query.EndTime), "The end time must be later than the start time.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
             var result = await _placeService.GetPlacesAsync(query, token);
 
             return Ok(result);

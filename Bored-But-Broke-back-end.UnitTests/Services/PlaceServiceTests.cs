@@ -1,5 +1,6 @@
 ﻿using Bored_But_Broke_back_end.Controllers;
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
+using Bored_But_Broke_back_end.Models;
 using Bored_But_Broke_back_end.Models.Queries;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Http;
@@ -90,11 +91,15 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
         public async Task GetPlacesAsync_ShouldPassCorrectQueryParamsToClient_WithNotEmptyQuery()
         {
             var location = "London";
+            var radius = 2000;
+            Price[] price = [Price.Cheap, Price.Moderate];
             var limit = 20;
 
             var query = new GetPlacesQuery 
             { 
                 Location = location,
+                Radius = radius,
+                Budget = price,
                 Limit = limit 
             };
             var token = CancellationToken.None;
@@ -109,8 +114,10 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
             await _placeService.GetPlacesAsync(query, token);
 
             queryParams.ShouldNotBeNull();
-            queryParams.Count.ShouldBe(2);
+            queryParams.Count.ShouldBe(4);
             queryParams["location"].ToString().ShouldBe(location);
+            queryParams["radius"].ToString().ShouldBe(radius.ToString());
+            queryParams["price"].ToString().ShouldBe(String.Join(",", price.Cast<int>()));
             queryParams["limit"].ToString().ShouldBe(limit.ToString());
 
             _mockYelpClient.Verify(m => m.GetPlacesAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()), Times.Once());
