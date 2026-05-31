@@ -18,7 +18,7 @@ namespace Bored_But_Broke_back_end.Models.Queries
 
         public DateOnly Date { get; set; }
         public TimeOnly StartTime { get; set; } = new TimeOnly(0, 0);
-        public TimeOnly EndTime { get; set; } = new TimeOnly(23, 59);
+        public TimeOnly EndTime { get; set; } = new TimeOnly(23, 00);
 
         [Range(0, 50, ErrorMessage = "Limit must be between 0 and 50.")]
         public int Limit { get; set; } = 50;
