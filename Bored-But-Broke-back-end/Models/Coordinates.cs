@@ -2,7 +2,7 @@
 {
     public class Coordinates
     {
-        public double Latitude { get; set; } = 0;
-        public double Longitude { get; set; } = 0;
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }

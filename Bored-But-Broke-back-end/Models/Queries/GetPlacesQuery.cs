@@ -14,7 +14,7 @@ namespace Bored_But_Broke_back_end.Models.Queries
         public int Radius { get; set; }
 
         [Length(1, 4, ErrorMessage = "Price array must contains between 1 and 4 items.")]
-        public Price[] Budget { get; set; } = [ Price.Cheap, Price.Moderate, Price.Expensive, Price.VeryExpensive];
+        public Price[] Budget { get; set; } = [ Price.Cheap, Price.Moderate, Price.Expensive, Price.VeryExpensive ];
 
         public DateOnly Date { get; set; }
         public TimeOnly StartTime { get; set; } = new TimeOnly(0, 0);

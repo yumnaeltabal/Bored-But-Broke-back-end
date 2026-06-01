@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using Bored_But_Broke_back_end.ExternalApis.Yelp.Responses;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 using System.Net;
 using System.Text.Json;
@@ -7,7 +8,7 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp
 {
     public interface IYelpClient
     {
-        public Task<SearchResponse> GetPlacesAsync(Dictionary<string, StringValues> query, CancellationToken token);
+        public Task<SearchResponse> BusinessesSearchAsync(Dictionary<string, StringValues> query, CancellationToken token);
     }
 
     // TODO: rewrite console log to logger
@@ -21,7 +22,8 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp
             _httpClient = httpClient;
         }
 
-        public async Task<SearchResponse> GetPlacesAsync(Dictionary<string, StringValues> query, CancellationToken token)
+        // TODO: refactor query into different params
+        public async Task<SearchResponse> BusinessesSearchAsync(Dictionary<string, StringValues> query, CancellationToken token)
         {
             HttpResponseMessage response;
 
@@ -50,7 +52,7 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp
                 throw new ExternalApiException(
                     statusCode: response.StatusCode,
                     errorTitle: $"Yelp API error: {response.ReasonPhrase}",
-                    errorDetail: error?.Error.Description
+                    errorDetail: error?.Error?.Description
                 );
             }
 

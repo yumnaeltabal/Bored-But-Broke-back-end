@@ -1,8 +1,6 @@
 ﻿using Bored_But_Broke_back_end.ExternalApis;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Threading;
 
 namespace Bored_But_Broke_back_end.Middlewares
 {
@@ -14,6 +12,7 @@ namespace Bored_But_Broke_back_end.Middlewares
             {
                 Status = exception switch
                 {
+                    BadHttpRequestException => (int?)((BadHttpRequestException)exception).StatusCode,
                     HttpRequestException => StatusCodes.Status502BadGateway,
                     TaskCanceledException => StatusCodes.Status504GatewayTimeout,
                     ExternalApiException => (int?)((ExternalApiException)exception).StatusCode,
@@ -21,6 +20,7 @@ namespace Bored_But_Broke_back_end.Middlewares
                 },
                 Title = exception switch
                 {
+                    BadHttpRequestException => "Bad Request",
                     HttpRequestException => "Bad Gateway",
                     TaskCanceledException => "Gateway Timeout",
                     ExternalApiException => ((ExternalApiException)exception).ErrorTitle,
@@ -28,6 +28,7 @@ namespace Bored_But_Broke_back_end.Middlewares
                 },
                 Detail = exception switch
                 {
+                    BadHttpRequestException => exception.Message,
                     HttpRequestException => exception.Message,
                     TaskCanceledException => exception.Message,
                     ExternalApiException => ((ExternalApiException)exception).ErrorDetail,
