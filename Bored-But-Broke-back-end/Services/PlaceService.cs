@@ -29,6 +29,8 @@ namespace Bored_But_Broke_back_end.Services
             var queryParams = new Dictionary<string, StringValues>();
             queryParams.Add("latitude", coordinates.Latitude.ToString());
             queryParams.Add("longitude", coordinates.Longitude.ToString());
+            //queryParams.Add("categories", query.Categories);
+            queryParams.Add("term", "Activity");
             queryParams.Add("radius", query.Radius.ToString());
             queryParams.Add("price", String.Join(",", Enumerable.Range(1, (int)query.Budget)));
             queryParams.Add("limit", query.Limit.ToString());
