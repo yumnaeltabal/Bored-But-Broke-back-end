@@ -72,8 +72,9 @@ namespace Bored_But_Broke_back_end
                 WeatherRequest request,
                 IWeatherService service) =>
             {
-                var result = await service.GetWeatherAndForwardAsync(request);
-                return Results.Ok(result);
+                var isIndoor = await service.GetWeatherAndForwardAsync(request);
+
+                return Results.Ok(isIndoor);
             });
 
             app.Run();
