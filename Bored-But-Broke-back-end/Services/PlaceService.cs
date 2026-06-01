@@ -30,7 +30,7 @@ namespace Bored_But_Broke_back_end.Services
             queryParams.Add("latitude", coordinates.Latitude.ToString());
             queryParams.Add("longitude", coordinates.Longitude.ToString());
             queryParams.Add("radius", query.Radius.ToString());
-            queryParams.Add("price", String.Join(",", query.Budget.Cast<int>()));
+            queryParams.Add("price", String.Join(",", Enumerable.Range(1, (int)query.Budget)));
             queryParams.Add("limit", query.Limit.ToString());
 
             var response = await _yelpClient.BusinessesSearchAsync(queryParams, token);
