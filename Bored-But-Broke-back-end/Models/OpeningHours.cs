@@ -4,11 +4,11 @@
     {
         public List<Hour> Hours { get; set; } = new List<Hour>();
         public string HoursType { get; set; } = string.Empty;
-        public bool IsOpenNow { get; set; } = false;
+        public bool? IsOpenNow { get; set; }
     }
     public class Hour
     {
-        public int Day { get; set; } = 0;
+        public int? Day { get; set; }
         public string Start { get; set; } = String.Empty;
         public string End { get; set; } = String.Empty;
     }

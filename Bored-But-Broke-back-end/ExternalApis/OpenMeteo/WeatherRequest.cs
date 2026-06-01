@@ -1,4 +1,4 @@
-﻿namespace Bored_But_Broke_back_end.ExternalApis.WeatherApi
+﻿namespace Bored_But_Broke_back_end.ExternalApis.OpenMeteo
 {
     public class WeatherRequest
     {

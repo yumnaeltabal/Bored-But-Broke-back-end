@@ -1,4 +1,4 @@
-﻿using Bored_But_Broke_back_end.ExternalApis.WeatherApi;
+﻿using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -9,8 +9,8 @@ namespace Bored_But_Broke_back_end.Services
 {
     public class WeatherService : IWeatherService
     {
-        private readonly IWeatherClient _client;
-        public WeatherService(IWeatherClient client)
+        private readonly IOpenMeteoClient _client;
+        public WeatherService(IOpenMeteoClient client)
         {
             _client = client;
         }
@@ -39,9 +39,6 @@ namespace Bored_But_Broke_back_end.Services
                 results.Add(new WeatherHourlyResult
                 {
                     Time = targetTime,
-                    Temperature = weather.hourly.temperature_2m[index],
-                    Precipitation = weather.hourly.precipitation[index],
-                    WindGust = weather.hourly.wind_gusts_10m[index]
                 });
             }
             return results;

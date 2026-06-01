@@ -1,8 +1,9 @@
-using Bored_But_Broke_back_end.Services;
+using Bored_But_Broke_back_end.ExternalApis.Geoapify;
+using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.Middlewares;
+using Bored_But_Broke_back_end.Services;
 using System.Net.Http.Headers;
-using Bored_But_Broke_back_end.ExternalApis.WeatherApi;
 
 namespace Bored_But_Broke_back_end
 {
@@ -13,8 +14,10 @@ namespace Bored_But_Broke_back_end
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddScoped<IPlaceService, PlaceService>();
+            builder.Services.AddScoped<ILocationService, LocationService>();
             builder.Services.AddScoped<IWeatherService, WeatherService>();
             builder.Services.AddScoped<IYelpClient, YelpClient>();
+            builder.Services.AddScoped<IGeoapifyClient, GeoapifyClient>();
 
             builder.Services.AddHttpClient<IYelpClient, YelpClient>(client =>
             {
@@ -28,7 +31,16 @@ namespace Bored_But_Broke_back_end
                 client.Timeout = TimeSpan.FromSeconds(20);
             });
 
-            builder.Services.AddHttpClient<IWeatherClient, WeatherClient>();
+            builder.Services.AddHttpClient<IGeoapifyClient, GeoapifyClient>(client =>
+            {
+                string _baseURL = "https://api.geoapify.com/v1/";
+                
+                client.BaseAddress = new Uri(_baseURL);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.Timeout = TimeSpan.FromSeconds(20);
+            });
+
+            builder.Services.AddHttpClient<IOpenMeteoClient, OpenMeteoClient>();
 
             builder.Services.AddExceptionHandler<ExceptionHandler>();
             builder.Services.AddProblemDetails();
