@@ -44,7 +44,6 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp
             }
 
             string responseBody = await response.Content.ReadAsStringAsync(token);
-            Console.WriteLine(responseBody);
 
             if (!response.IsSuccessStatusCode)
             {
