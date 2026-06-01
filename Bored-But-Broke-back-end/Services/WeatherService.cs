@@ -15,7 +15,7 @@ namespace Bored_But_Broke_back_end.Services
             _client = client;
         }
 
-        public async Task<List<WeatherHourlyResult>> GetWeatherAndForwardAsync(WeatherRequest request)
+        public async Task<bool> GetWeatherAndForwardAsync(WeatherRequest request)
         {
 
             var weather = await _client.GetWeatherAsync(request.lat,
@@ -25,7 +25,8 @@ namespace Bored_But_Broke_back_end.Services
             if (weather == null || weather.hourly == null)
                 throw new Exception("Weather API failed");
 
-            var results = new List<WeatherHourlyResult>();
+            int badHours = 0;
+            int totalHours = 0;
 
             foreach (var hour in request.Hours)
             {
@@ -36,12 +37,25 @@ namespace Bored_But_Broke_back_end.Services
                 {
                     continue;
                 }
-                results.Add(new WeatherHourlyResult
+                totalHours++;
+
+               if (weather.hourly.weather_code[index] > 51)
                 {
-                    Time = targetTime,
-                });
+                    badHours++;
+                }
+
+               
             }
-            return results;
+            if (totalHours == 0)
+                {
+                    throw new Exception("You didnt give a right time");
+                }
+
+                var badWeatherPercentage = (double)badHours / (double)totalHours * 100;
+
+                bool isIndoor = badWeatherPercentage >= 40;
+                
+                return isIndoor;
         }
     }
 }
