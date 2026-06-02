@@ -1,10 +1,13 @@
+using Bored_But_Broke_back_end.Data;
 using Bored_But_Broke_back_end.ExternalApis.Geoapify;
 using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.Middlewares;
+using Bored_But_Broke_back_end.Models;
 using Bored_But_Broke_back_end.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Net.Http.Headers;
 
@@ -17,10 +20,56 @@ namespace Bored_But_Broke_back_end
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddScoped<IPlaceService, PlaceService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ILocationService, LocationService>();
             builder.Services.AddScoped<IWeatherService, WeatherService>();
             builder.Services.AddScoped<IYelpClient, YelpClient>();
             builder.Services.AddScoped<IGeoapifyClient, GeoapifyClient>();
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=BoredButBroke;Trusted_Connection=True;TrustServerCertificate=True;")
+            );
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                options.SlidingExpiration = true;
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = 403;
+                    return Task.CompletedTask;
+                };
+            });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("BBBFrontEnd", policy =>
+                policy.WithOrigins("https://localhost:7256")
+                .AllowCredentials()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+            });
+
+            builder.Services.AddAuthorization();
 
             builder.Services.AddHttpClient<IYelpClient, YelpClient>(client =>
             {
@@ -86,6 +135,8 @@ namespace Bored_But_Broke_back_end
 
             app.UseHttpsRedirection();
 
+            app.UseCors("BBBFrontEnd");
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

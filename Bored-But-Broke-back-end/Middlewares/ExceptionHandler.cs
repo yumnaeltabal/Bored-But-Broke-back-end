@@ -1,4 +1,4 @@
-﻿using Bored_But_Broke_back_end.ExternalApis;
+﻿using Bored_But_Broke_back_end.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -18,26 +18,32 @@ namespace Bored_But_Broke_back_end.Middlewares
             {
                 Status = exception switch
                 {
-                    BadHttpRequestException => (int?)((BadHttpRequestException)exception).StatusCode,
+                    BadHttpRequestException e => e.StatusCode,
+                    RegistrationFailedException => StatusCodes.Status400BadRequest,
+                    EmailAlreadyInUseException => StatusCodes.Status409Conflict,
                     HttpRequestException => StatusCodes.Status502BadGateway,
                     TaskCanceledException => StatusCodes.Status504GatewayTimeout,
-                    ExternalApiException => (int?)((ExternalApiException)exception).StatusCode,
+                    ExternalApiException e => (int?)e.StatusCode,
                     _ => StatusCodes.Status500InternalServerError
                 },
                 Title = exception switch
                 {
                     BadHttpRequestException => "Bad Request",
+                    RegistrationFailedException => "Bad Request",
+                    EmailAlreadyInUseException => "Conflict",
                     HttpRequestException => "Bad Gateway",
                     TaskCanceledException => "Gateway Timeout",
-                    ExternalApiException => ((ExternalApiException)exception).ErrorTitle,
+                    ExternalApiException e => e.ErrorTitle,
                     _ => "Internal Server Error"
                 },
                 Detail = exception switch
                 {
                     BadHttpRequestException => exception.Message,
+                    RegistrationFailedException => exception.Message,
+                    EmailAlreadyInUseException => exception.Message,
                     HttpRequestException => exception.Message,
                     TaskCanceledException => exception.Message,
-                    ExternalApiException => ((ExternalApiException)exception).ErrorDetail,
+                    ExternalApiException e => e.ErrorDetail,
                     _ => "Please try again later."
                 }
             };
@@ -54,10 +60,6 @@ namespace Bored_But_Broke_back_end.Middlewares
                 ProblemDetails = problemDetails,
                 Exception = exception
             });
-
-            await httpContext.Response.WriteAsJsonAsync(problemDetails, token);
-
-            return true;
         }
     }
 }

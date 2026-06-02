@@ -1,4 +1,5 @@
-﻿using Bored_But_Broke_back_end.ExternalApis.Geoapify.Responses;
+﻿using Bored_But_Broke_back_end.Exceptions;
+using Bored_But_Broke_back_end.ExternalApis.Geoapify.Responses;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 using System.Net;
@@ -33,6 +34,7 @@ namespace Bored_But_Broke_back_end.ExternalApis.Geoapify
             query.Add("text", address);
             query.Add("lang", "en");
             query.Add("limit", "1");
+            query.Add("bias", "countrycode:gb");
             query.Add("format", "json");
 
             var url = QueryHelpers.AddQueryString(_geocodingEndPoint, query);
