@@ -3,7 +3,9 @@ using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.Models;
 using Bored_But_Broke_back_end.Models.Queries;
 using Bored_But_Broke_back_end.Models.Requests;
+using Bored_But_Broke_back_end.Models.Responses;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace Bored_But_Broke_back_end.Services
 {
@@ -12,6 +14,7 @@ namespace Bored_But_Broke_back_end.Services
         Task RegisterUserAsync(RegisterUserRequest request);
         Task LoginUserAsync(LoginUserRequest request);
         Task LogoutUserAsync();
+        Task<UserInfoResponse?> GetCurrentUserAsync(HttpContext context);
     }
     public class AuthService : IAuthService
     {
@@ -73,6 +76,18 @@ namespace Bored_But_Broke_back_end.Services
         public async Task LogoutUserAsync()
         {
             await _signInManager.SignOutAsync();
+        }
+        public async Task<UserInfoResponse?> GetCurrentUserAsync(HttpContext context)
+        {
+            var user = await _userManager.GetUserAsync(context.User);
+
+            if (user is null) return null;
+
+            return new UserInfoResponse
+            {
+                Email = user.Email,
+                FirstName = user.FirstName
+            };
         }
     }
 }

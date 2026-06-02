@@ -1,6 +1,7 @@
 ﻿using Bored_But_Broke_back_end.Models.Requests;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,5 +41,15 @@ namespace Bored_But_Broke_back_end.Controllers
             return Ok("Logout successful");
         }
 
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUserAsync()
+        {
+            var user = await _authService.GetCurrentUserAsync(HttpContext);
+
+            if (user is null) return Unauthorized("The user does not exist");
+
+            return Ok(user);
+        }
     }
 }
