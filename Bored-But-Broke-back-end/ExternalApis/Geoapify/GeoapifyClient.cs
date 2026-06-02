@@ -12,7 +12,6 @@ namespace Bored_But_Broke_back_end.ExternalApis.Geoapify
     }
 
     // TODO: rewrite console log to logger
-    // TODO: Empty list for no results
     public class GeoapifyClient : IGeoapifyClient
     {
         private readonly HttpClient _httpClient;

@@ -1,4 +1,5 @@
-﻿using Bored_But_Broke_back_end.ExternalApis.Yelp;
+﻿using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
+using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.ExternalApis.Yelp.Extensions;
 using Bored_But_Broke_back_end.ExternalApis.Yelp.Responses;
 using Bored_But_Broke_back_end.Models;
@@ -14,6 +15,7 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
     {
         private Mock<IYelpClient> _mockYelpClient;
         private Mock<ILocationService> _mockLocationService;
+        private Mock<IWeatherService> _mockWeatherService;
         private PlaceService _placeService;
 
         [SetUp]
@@ -21,7 +23,11 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
         {
             _mockYelpClient = new Mock<IYelpClient>();
             _mockLocationService = new Mock<ILocationService>();
-            _placeService = new PlaceService(_mockYelpClient.Object, _mockLocationService.Object);
+            _mockWeatherService = new Mock<IWeatherService>();
+            _placeService = new PlaceService(
+                _mockYelpClient.Object, 
+                _mockLocationService.Object, 
+                _mockWeatherService.Object);
         }
 
         [Test]
@@ -40,7 +46,11 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
 
             _mockLocationService
                 .Setup(m => m.GetCoordinatesFromAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Coordinates());
+                .ReturnsAsync(new Coordinates { Latitude = 0, Longitude = 0 });
+
+            _mockWeatherService
+                .Setup(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()))
+                .ReturnsAsync(false);
 
             _mockYelpClient
                 .Setup(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()))
@@ -52,6 +62,7 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
             result.ShouldBeEmpty();
 
             _mockLocationService.Verify(m => m.GetCoordinatesFromAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
+            _mockWeatherService.Verify(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()), Times.Once());
             _mockYelpClient.Verify(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()), Times.Once());
         }
 
@@ -75,7 +86,11 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
 
             _mockLocationService
                 .Setup(m => m.GetCoordinatesFromAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Coordinates());
+                .ReturnsAsync(new Coordinates { Latitude = 0, Longitude = 0 });
+
+            _mockWeatherService
+                .Setup(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()))
+                .ReturnsAsync(false);
 
             _mockYelpClient
                 .Setup(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()))
@@ -88,6 +103,7 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
             result.ShouldBeEquivalentTo(response.ToPlaces());
 
             _mockLocationService.Verify(m => m.GetCoordinatesFromAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
+            _mockWeatherService.Verify(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()), Times.Once());
             _mockYelpClient.Verify(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()), Times.Once());
         }
 
@@ -97,17 +113,21 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
         {
             var location = "London";
             var radius = 2000;
-            Price[] price = [Price.Cheap, Price.Moderate];
+            Price price = Price.Expensive;
             var limit = 20;
             var latitude = 1.1;
             var longitude = 2.2;
+            var categories = "water_activities";
+            var ageRange = AgeRange.Over18;
 
             var query = new GetPlacesQuery 
             { 
                 Location = location,
                 Radius = radius,
                 Budget = price,
-                Limit = limit 
+                Limit = limit,
+                Categories = categories,
+                AgeRange = ageRange
             };
             var coordinates = new Coordinates
             {
@@ -122,6 +142,10 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
                 .Setup(m => m.GetCoordinatesFromAddressAsync(location, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(coordinates);
 
+            _mockWeatherService
+                .Setup(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()))
+                .ReturnsAsync(true);
+
             _mockYelpClient
                 .Setup(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()))
                 .Callback<Dictionary<string, StringValues>, CancellationToken>((d, _) => queryParams = d)
@@ -130,14 +154,17 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
             await _placeService.GetPlacesAsync(query, token);
 
             queryParams.ShouldNotBeNull();
-            queryParams.Count.ShouldBe(5);
+            queryParams.Count.ShouldBe(7);
             queryParams["latitude"].ToString().ShouldBe(latitude.ToString());
             queryParams["longitude"].ToString().ShouldBe(longitude.ToString());
+            queryParams["categories"].ToString().ShouldBe("swimminglessons");
+            queryParams["term"].ToString().ShouldBe("Activity");
             queryParams["radius"].ToString().ShouldBe(radius.ToString());
-            queryParams["price"].ToString().ShouldBe(String.Join(",", price.Cast<int>()));
+            queryParams["price"].ToString().ShouldBe(String.Join(",", Enumerable.Range(1, (int)price)));
             queryParams["limit"].ToString().ShouldBe(limit.ToString());
 
             _mockLocationService.Verify(m => m.GetCoordinatesFromAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
+            _mockWeatherService.Verify(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()), Times.Once());
             _mockYelpClient.Verify(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()), Times.Once());
         }
 
@@ -152,7 +179,11 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
 
             _mockLocationService
                 .Setup(m => m.GetCoordinatesFromAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Coordinates());
+                .ReturnsAsync(new Coordinates { Latitude = 0, Longitude = 0 });
+
+            _mockWeatherService
+                .Setup(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()))
+                .ReturnsAsync(false);
 
             _mockYelpClient
                 .Setup(c => c.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()))
@@ -181,7 +212,11 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
 
             _mockLocationService
                 .Setup(m => m.GetCoordinatesFromAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Coordinates());
+                .ReturnsAsync(new Coordinates { Latitude = 0, Longitude = 0 });
+
+            _mockWeatherService
+                .Setup(m => m.GetWeatherAndForwardAsync(It.IsAny<WeatherRequest>()))
+                .ReturnsAsync(false);
 
             _mockYelpClient
                 .Setup(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()))
