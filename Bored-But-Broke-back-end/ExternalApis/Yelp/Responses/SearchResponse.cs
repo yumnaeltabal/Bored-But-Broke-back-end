@@ -30,7 +30,7 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp.Responses
         [JsonPropertyName("distance")]
         public double? Distance { get; set; }
 
-        [JsonPropertyName("business_hours")]
+        [JsonPropertyName("hours")]
         public List<YelpBusinessHours>? BusinessHours { get; set; } = new();
 
         [JsonPropertyName("rating")]
