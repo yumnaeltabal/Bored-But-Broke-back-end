@@ -54,5 +54,57 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp.Extensions
                 }
             ).ToList();
         }
+        public static Place ToPlace(this YelpBusiness business)
+        {
+            return new Place
+            {
+                PlaceId = business.PlaceId ?? string.Empty,
+                PlaceName = business.PlaceName ?? string.Empty,
+
+                Location = new Location
+                {
+                    Address1 = business.Location?.Address1 ?? string.Empty,
+                    Address2 = business.Location?.Address2 ?? string.Empty,
+                    Address3 = business.Location?.Address3 ?? string.Empty,
+                    City = business.Location?.City ?? string.Empty,
+                    ZipCode = business.Location?.ZipCode ?? string.Empty,
+                    Country = business.Location?.Country ?? string.Empty,
+                    State = business.Location?.State ?? string.Empty,
+                    DisplayAddress = business.Location?.DisplayAddress ?? []
+                },
+
+                Categories = business.Categories?.Select(c => new Category
+                {
+                    Alias = c.Alias ?? string.Empty,
+                    Title = c.Title ?? string.Empty
+                }).ToList() ?? [],
+
+                Price = (Price?)business.Price?.Length,
+
+                Coordinates = new Coordinates
+                {
+                    Latitude = business.Coordinates?.Latitude,
+                    Longitude = business.Coordinates?.Longitude
+                },
+
+                OpeningHours = business.BusinessHours?.Select(bh => new OpeningHours
+                {
+                    Hours = bh.Hours?.Select(h => new Hour
+                    {
+                        Day = h.Day,
+                        Start = h.Start ?? string.Empty,
+                        End = h.End ?? string.Empty
+                    }).ToList() ?? [],
+                    HoursType = bh.HoursType ?? string.Empty,
+                    IsOpenNow = bh.IsOpenNow
+                }).ToList() ?? [],
+
+                Rating = business.Rating,
+                PlaceUrl = business.Attributes?.PlaceUrl ?? string.Empty,
+                ImageUrl = business.ImageUrl ?? string.Empty
+            };
+
+           
+        }
     }
 }
