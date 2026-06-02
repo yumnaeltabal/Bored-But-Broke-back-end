@@ -63,7 +63,7 @@ namespace Bored_But_Broke_back_end.ExternalApis.Yelp
                     errorDetail: "Failed to deserialize response from Yelp API."
                 );
         }
-        public async Task<YelpBusiness> GetBusinessByIdAsync(string placeId, CancellationToken token)
+        public async Task<YelpBusiness> BusinessesGetByIdAsync(string placeId, CancellationToken token)
         {
             HttpResponseMessage response;
 
