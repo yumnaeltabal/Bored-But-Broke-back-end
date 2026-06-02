@@ -20,12 +20,19 @@ namespace Bored_But_Broke_back_end.Controllers
         {
             if (query.StartTime > query.EndTime)
             {
-                ModelState.AddModelError(nameof(query.EndTime), "The end time must be later than the start time.");
+                ModelState.AddModelError(nameof(query.EndTime), "The end time must be later than the start time");
             }
 
             if (!ModelState.IsValid)
             {
-                return ValidationProblem(ModelState);
+                var errors = ModelState
+                    .Where(e => e.Value?.Errors.Count > 0)
+                    .Select(e => $"{e.Key}: {string.Join(", ", e.Value!.Errors.Select(x => x.ErrorMessage))}")
+                    .ToList();
+
+                return ValidationProblem(
+                    detail: string.Join(" | ", errors),
+                    modelStateDictionary: ModelState);
             }
 
             var result = await _placeService.GetPlacesAsync(query, token);
