@@ -12,6 +12,7 @@ namespace Bored_But_Broke_back_end.Services
     public interface IPlaceService
     {
         Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken ct);
+        Task<Place> GetPlaceByIdAsync(string placeId, CancellationToken ct);
     }
     public class PlaceService : IPlaceService
     {
@@ -36,23 +37,16 @@ namespace Bored_But_Broke_back_end.Services
         private readonly IYelpClient _yelpClient;
         private readonly ILocationService _locationService;
         private readonly IWeatherService _weatherService;
-        public PlaceService(IYelpClient yelpClient, ILocationService locationService, IWeatherService weatherService) 
-        { 
+        public PlaceService(IYelpClient yelpClient, ILocationService locationService, IWeatherService weatherService)
+        {
             _yelpClient = yelpClient;
             _locationService = locationService;
             _weatherService = weatherService;
         }
         public async Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken token)
         {
-            Console.WriteLine(query.Location);
-            Console.WriteLine(query.Radius);
-            Console.WriteLine(query.StartTime);
-            Console.WriteLine(query.EndTime);
-            Console.WriteLine(query.AgeRange);
-            Console.WriteLine(query.Budget);
-            Console.WriteLine(query.Categories);
-            Console.WriteLine(query.Date);
-            var coordinates = await _locationService.GetCoordinatesFromAddressAsync(query.Location, token) 
+
+            var coordinates = await _locationService.GetCoordinatesFromAddressAsync(query.Location, token)
                 ?? throw new BadHttpRequestException("Please enter a valid location in the UK.");
 
             int startHour = query.StartTime.Hour;
@@ -103,5 +97,11 @@ namespace Bored_But_Broke_back_end.Services
 
             return response.ToPlaces();
         }
+        public async Task<Place> GetPlaceByIdAsync(string placeId, CancellationToken token)
+        {
+            var business = await _yelpClient.BusinessesGetByIdAsync(placeId, token);
+            return business.ToPlace();
+        }
     }
+
 }
