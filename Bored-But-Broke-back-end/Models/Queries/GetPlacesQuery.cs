@@ -7,12 +7,12 @@ namespace Bored_But_Broke_back_end.Models.Queries
     public class GetPlacesQuery
     {
         [FromQuery(Name = "location")]
-        [Required(ErrorMessage = "Location must not be empty.")]
-        [StringLength(250, ErrorMessage = "Location must not be longer than 250 characters.")]
+        [Required(ErrorMessage = "Location must not be empty")]
+        [StringLength(250, ErrorMessage = "Location must not be longer than 250 characters")]
         public required string Location { get; set; }
 
         [FromQuery(Name = "radius")]
-        [Range(0, 40000, ErrorMessage = "Radius must be between 0 and 40,000.")]
+        [Range(0, 40000, ErrorMessage = "Radius must be between 0 and 40,000")]
         public int Radius { get; set; } = 24140;
 
         [FromQuery(Name = "date")]
@@ -31,12 +31,12 @@ namespace Bored_But_Broke_back_end.Models.Queries
         public AgeRange AgeRange { get; set; } = AgeRange.Over18;
 
         [FromQuery(Name = "budget")]
-        [Range(1, 4, ErrorMessage = "Budget must be between 1 and 4.")]
+        [Range(1, 4, ErrorMessage = "Budget must be between 1 and 4")]
         public Price Budget { get; set; } = Price.VeryExpensive;
 
         [FromQuery(Name = "limit")]
 
-        [Range(0, 50, ErrorMessage = "Limit must be between 0 and 50.")]
+        [Range(0, 50, ErrorMessage = "Limit must be between 0 and 50")]
         public int Limit { get; set; } = 50;
     }
 }
