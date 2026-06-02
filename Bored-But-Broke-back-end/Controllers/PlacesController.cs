@@ -39,5 +39,15 @@ namespace Bored_But_Broke_back_end.Controllers
 
             return Ok(result);
         }
+        [HttpGet("{placeId:length(22)}")]
+        public async Task<IActionResult> GetPlacesByIdAsync(string placeId, CancellationToken token)
+        {
+            var result = await _placeService.GetPlaceByIdAsync(placeId, token);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
     }
 }
