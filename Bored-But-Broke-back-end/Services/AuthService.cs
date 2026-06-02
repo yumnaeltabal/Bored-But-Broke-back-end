@@ -11,6 +11,7 @@ namespace Bored_But_Broke_back_end.Services
     {
         Task RegisterUserAsync(RegisterUserRequest request);
         Task LoginUserAsync(LoginUserRequest request);
+        Task LogoutUserAsync();
     }
     public class AuthService : IAuthService
     {
@@ -68,6 +69,10 @@ namespace Bored_But_Broke_back_end.Services
             if (result.IsLockedOut) throw new UserLockedOutException();
 
             if (!result.Succeeded) throw new LoginUnsuccessfulException();
+        }
+        public async Task LogoutUserAsync()
+        {
+            await _signInManager.SignOutAsync();
         }
     }
 }

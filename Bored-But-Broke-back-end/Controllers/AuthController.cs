@@ -31,5 +31,14 @@ namespace Bored_But_Broke_back_end.Controllers
 
             return Ok("Login successful");
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogoutUserAsync()
+        {
+            await _authService.LogoutUserAsync();
+
+            return Ok("Logout successful");
+        }
+
     }
 }
