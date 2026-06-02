@@ -1,15 +1,18 @@
 using Bored_But_Broke_back_end.Data;
 using Bored_But_Broke_back_end.ExternalApis.Geoapify;
 using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
+using Bored_But_Broke_back_end.HealthChecks;
 using Bored_But_Broke_back_end.Middlewares;
 using Bored_But_Broke_back_end.Models;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace Bored_But_Broke_back_end
 {
@@ -139,9 +142,28 @@ namespace Bored_But_Broke_back_end
             app.UseAuthentication();
             app.UseAuthorization();
 
-
             app.MapControllers();
 
+            app.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                ResponseWriter = async (context, report) =>
+                {
+                    context.Response.ContentType = "application/json";
+                    var response = new
+                    {
+                        status = report.Status.ToString(),
+                        checks = report.Entries.Select(e => new
+                        {
+                            name = e.Key,
+                            status = e.Value.Status.ToString(),
+                            description = e.Value.Description,
+                            data = e.Value.Data
+                        })
+                    };
+                    await context.Response.WriteAsync(
+                        JsonSerializer.Serialize(response));
+                }
+            });
 
             app.MapPost("/weather", async (
                 WeatherRequest request,
