@@ -44,6 +44,33 @@ namespace Bored_But_Broke_back_end
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
+            builder.Services.AddHttpClient<IYelpClient, YelpClient>(client =>
+            {
+                string _baseURL = "https://api.yelp.com/v3/";
+                string _apiKey = builder.Configuration["YELP_API_KEY"]
+                    ?? throw new InvalidOperationException("Environment variable 'YELP_API_KEY' is missing.");
+                
+                client.BaseAddress = new Uri(_baseURL);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+                client.Timeout = TimeSpan.FromSeconds(20);
+            });
+
+            builder.Services.AddHttpClient<IGeoapifyClient, GeoapifyClient>(client =>
+            {
+                string _baseURL = "https://api.geoapify.com/v1/";
+                
+                client.BaseAddress = new Uri(_baseURL);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.Timeout = TimeSpan.FromSeconds(20);
+            });
+
+            builder.Services.AddHttpClient<IOpenMeteoClient, OpenMeteoClient>();
+
+            builder.Services.AddHealthChecks().AddCheck<ExternalApisHealthCheck>("External API Health Check");
+            builder.Services.AddExceptionHandler<ExceptionHandler>();
+            builder.Services.AddProblemDetails();
+
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
@@ -73,32 +100,6 @@ namespace Bored_But_Broke_back_end
             });
 
             builder.Services.AddAuthorization();
-
-            builder.Services.AddHttpClient<IYelpClient, YelpClient>(client =>
-            {
-                string _baseURL = "https://api.yelp.com/v3/";
-                string _apiKey = builder.Configuration["YELP_API_KEY"]
-                    ?? throw new InvalidOperationException("Environment variable 'YELP_API_KEY' is missing.");
-                
-                client.BaseAddress = new Uri(_baseURL);
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-                client.Timeout = TimeSpan.FromSeconds(20);
-            });
-
-            builder.Services.AddHttpClient<IGeoapifyClient, GeoapifyClient>(client =>
-            {
-                string _baseURL = "https://api.geoapify.com/v1/";
-                
-                client.BaseAddress = new Uri(_baseURL);
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-                client.Timeout = TimeSpan.FromSeconds(20);
-            });
-
-            builder.Services.AddHttpClient<IOpenMeteoClient, OpenMeteoClient>();
-
-            builder.Services.AddExceptionHandler<ExceptionHandler>();
-            builder.Services.AddProblemDetails();
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
