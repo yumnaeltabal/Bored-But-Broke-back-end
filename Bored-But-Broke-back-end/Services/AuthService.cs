@@ -10,13 +10,16 @@ namespace Bored_But_Broke_back_end.Services
     public interface IAuthService
     {
         Task RegisterUserAsync(RegisterUserRequest request);
+        Task LoginUserAsync(LoginUserRequest request);
     }
     public class AuthService : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        public AuthService(UserManager<ApplicationUser> userManager)
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
         public async Task RegisterUserAsync(RegisterUserRequest request)
         {
@@ -50,6 +53,21 @@ namespace Bored_But_Broke_back_end.Services
                     string.Join(" | ", result.Errors.Select(x => x.Description))
                 );
             }
+        }
+        public async Task LoginUserAsync(LoginUserRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+
+            if (user is null) throw new LoginUnsuccessfulException();
+
+            var result = await _signInManager.PasswordSignInAsync(
+                user, request.Password, 
+                isPersistent: true, 
+                lockoutOnFailure: true);
+
+            if (result.IsLockedOut) throw new UserLockedOutException();
+
+            if (!result.Succeeded) throw new LoginUnsuccessfulException();
         }
     }
 }

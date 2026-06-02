@@ -14,38 +14,24 @@ namespace Bored_But_Broke_back_end.Middlewares
         }
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken token)
         {
+            var (statusCode, title, detail) = exception switch
+            {
+                BadHttpRequestException e => (e.StatusCode, "Bad Request", e.Message),
+                RegistrationFailedException e => (StatusCodes.Status400BadRequest, "Bad Request", e.Message),
+                LoginUnsuccessfulException e => (StatusCodes.Status401Unauthorized, "Unauthorized", e.Message),
+                EmailAlreadyInUseException e => (StatusCodes.Status409Conflict, "Conflict", e.Message),
+                UserLockedOutException e => (StatusCodes.Status429TooManyRequests, "Too Many Requests", e.Message),
+                HttpRequestException e => (StatusCodes.Status502BadGateway, "Bad Gateway", e.Message),
+                TaskCanceledException e => (StatusCodes.Status504GatewayTimeout, "Gateway Timeout", e.Message),
+                ExternalApiException e => ((int?)e.StatusCode, e.ErrorTitle, e.ErrorDetail),
+                _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", "Please try again later.")
+            };
+
             var problemDetails = new ProblemDetails
             {
-                Status = exception switch
-                {
-                    BadHttpRequestException e => e.StatusCode,
-                    RegistrationFailedException => StatusCodes.Status400BadRequest,
-                    EmailAlreadyInUseException => StatusCodes.Status409Conflict,
-                    HttpRequestException => StatusCodes.Status502BadGateway,
-                    TaskCanceledException => StatusCodes.Status504GatewayTimeout,
-                    ExternalApiException e => (int?)e.StatusCode,
-                    _ => StatusCodes.Status500InternalServerError
-                },
-                Title = exception switch
-                {
-                    BadHttpRequestException => "Bad Request",
-                    RegistrationFailedException => "Bad Request",
-                    EmailAlreadyInUseException => "Conflict",
-                    HttpRequestException => "Bad Gateway",
-                    TaskCanceledException => "Gateway Timeout",
-                    ExternalApiException e => e.ErrorTitle,
-                    _ => "Internal Server Error"
-                },
-                Detail = exception switch
-                {
-                    BadHttpRequestException => exception.Message,
-                    RegistrationFailedException => exception.Message,
-                    EmailAlreadyInUseException => exception.Message,
-                    HttpRequestException => exception.Message,
-                    TaskCanceledException => exception.Message,
-                    ExternalApiException e => e.ErrorDetail,
-                    _ => "Please try again later."
-                }
+                Status = statusCode,
+                Title = title,
+                Detail = detail
             };
 
             var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
