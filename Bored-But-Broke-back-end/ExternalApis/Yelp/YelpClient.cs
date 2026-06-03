@@ -1,4 +1,5 @@
-﻿using Bored_But_Broke_back_end.ExternalApis.Yelp.Responses;
+﻿using Bored_But_Broke_back_end.Exceptions;
+using Bored_But_Broke_back_end.ExternalApis.Yelp.Responses;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 using System.Net;

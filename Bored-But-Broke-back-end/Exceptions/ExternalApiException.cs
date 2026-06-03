@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Bored_But_Broke_back_end.ExternalApis
+namespace Bored_But_Broke_back_end.Exceptions
 {
     public class ExternalApiException : Exception
     {
