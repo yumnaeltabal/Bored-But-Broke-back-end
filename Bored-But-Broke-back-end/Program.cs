@@ -102,15 +102,26 @@ namespace Bored_But_Broke_back_end
             });
 
             builder.Services.AddRateLimiter(options =>
-
             {
-                options.AddFixedWindowLimiter(policyName: "fixed", options =>
+                options.AddPolicy("fixed", httpContext =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 20,
+                            Window = TimeSpan.FromMinutes(5),
+                            QueueLimit = 2,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                        }));
+
+                options.OnRejected = async (context, ct) =>
                 {
-                    options.PermitLimit = 20;
-                    options.Window = TimeSpan.FromMinutes(5);
-                    options.QueueLimit = 2;
-                    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                });
+                    context.HttpContext.Response.StatusCode = 429;
+                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                        context.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter.TotalSeconds).ToString();
+
+                    await context.HttpContext.Response.WriteAsync("Too many requests. Try again later.", ct);
+                };
             });
 
             builder.Services.AddAuthorization();
