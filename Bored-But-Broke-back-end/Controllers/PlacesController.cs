@@ -1,6 +1,7 @@
 ﻿using Bored_But_Broke_back_end.Models.Queries;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Bored_But_Broke_back_end.Controllers
 {
@@ -40,7 +41,8 @@ namespace Bored_But_Broke_back_end.Controllers
             return Ok(result);
         }
         [HttpGet("{placeId:length(22)}")]
-        public async Task<IActionResult> GetPlacesByIdAsync(string placeId, CancellationToken token)
+        [EnableRateLimiting("fixed")]
+        public async Task<IActionResult> GetPlaceByIdAsync(string placeId, CancellationToken token)
         {
             var result = await _placeService.GetPlaceByIdAsync(placeId, token);
             if (result == null)

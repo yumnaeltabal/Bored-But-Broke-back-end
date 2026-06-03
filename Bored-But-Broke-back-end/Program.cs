@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 namespace Bored_But_Broke_back_end
 {
@@ -99,6 +101,18 @@ namespace Bored_But_Broke_back_end
                 .AllowAnyMethod());
             });
 
+            builder.Services.AddRateLimiter(options =>
+
+            {
+                options.AddFixedWindowLimiter(policyName: "fixed", options =>
+                {
+                    options.PermitLimit = 20;
+                    options.Window = TimeSpan.FromMinutes(5);
+                    options.QueueLimit = 2;
+                    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                });
+            });
+
             builder.Services.AddAuthorization();
 
             builder.Services.AddControllers()
@@ -128,6 +142,10 @@ namespace Bored_But_Broke_back_end
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            app.UseRouting();
+
+            app.UseRateLimiter();
 
             app.UseExceptionHandler();
 
