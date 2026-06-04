@@ -1,4 +1,5 @@
-﻿using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
+﻿using Bored_But_Broke_back_end.Exceptions;
+using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.ExternalApis.Yelp.Extensions;
 using Bored_But_Broke_back_end.Models;
@@ -99,7 +100,9 @@ namespace Bored_But_Broke_back_end.Services
         }
         public async Task<Place> GetPlaceByIdAsync(string placeId, CancellationToken token)
         {
-            var business = await _yelpClient.BusinessesGetByIdAsync(placeId, token);
+            var business = await _yelpClient.BusinessesGetByIdAsync(placeId, token)
+                ?? throw new PlaceNotFoundException(placeId);
+
             return business.ToPlace();
         }
     }
