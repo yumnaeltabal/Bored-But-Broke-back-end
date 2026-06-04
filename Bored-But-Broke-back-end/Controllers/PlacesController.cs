@@ -1,6 +1,7 @@
 ﻿using Bored_But_Broke_back_end.Models.Queries;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace Bored_But_Broke_back_end.Controllers
@@ -17,6 +18,7 @@ namespace Bored_But_Broke_back_end.Controllers
         }
 
         [HttpGet]
+        [OutputCache(PolicyName = "PlacesPolicy")]
         public async Task<IActionResult> GetPlacesAsync([FromQuery] GetPlacesQuery query, CancellationToken token)
         {
             if (query.StartTime > query.EndTime)
@@ -42,7 +44,8 @@ namespace Bored_But_Broke_back_end.Controllers
         }
         [HttpGet("{placeId:length(22)}")]
         [EnableRateLimiting("fixed")]
-        public async Task<IActionResult> GetPlaceByIdAsync(string placeId, CancellationToken token)
+        [OutputCache]
+        public async Task<IActionResult> GetPlaceByIdAsync([FromRoute] string placeId, CancellationToken token)
         {
             var result = await _placeService.GetPlaceByIdAsync(placeId, token);
             if (result == null)

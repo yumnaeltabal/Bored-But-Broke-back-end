@@ -101,6 +101,19 @@ namespace Bored_But_Broke_back_end
                 .AllowAnyMethod());
             });
 
+            builder.Services.AddOutputCache(options =>
+            {
+                options.AddPolicy("PlacesPolicy", policy => policy
+                    .Expire(TimeSpan.FromMinutes(5))
+                    .SetVaryByQuery("location", "radius", "date", 
+                    "startTime", "endTime", "categories", 
+                    "ageRange", "budget", "limit")
+                );
+                options.SizeLimit = 100 * 1024 * 1024;
+                options.MaximumBodySize = 2 * 1024 * 1024;
+                options.AddBasePolicy(policy => policy.Expire(TimeSpan.FromMinutes(5)));
+            });
+
             builder.Services.AddRateLimiter(options =>
             {
                 options.AddPolicy("fixed", httpContext =>
@@ -156,6 +169,7 @@ namespace Bored_But_Broke_back_end
 
             app.UseRouting();
 
+            app.UseOutputCache();
             app.UseRateLimiter();
 
             app.UseExceptionHandler();
