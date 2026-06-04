@@ -35,6 +35,7 @@ namespace Bored_But_Broke_back_end.HealthChecks
             {
                 data["Yelp"] = $"Unhealthy: {ex.Message}";
             }
+
             try
             {
                 await _geoapifyClient.ForwardGeocodingAsync(
@@ -46,6 +47,22 @@ namespace Bored_But_Broke_back_end.HealthChecks
             catch (Exception ex)
             {
                 data["Geoapify"] = $"Unhealthy: {ex.Message}";
+            }
+
+            try
+            {
+                var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+                await _openMeteoClient.GetWeatherAsync(
+                    latitude: 53.4808,
+                    longitude: -2.2426,
+                    date: today);
+
+                data["OpenMeteo"] = "Healthy";
+            }
+            catch (Exception ex)
+            {
+                data["OpenMeteo"] = $"Unhealthy: {ex.Message}";
             }
             bool allHealthy = data.Values.All(v => v.ToString() == "Healthy");
 
