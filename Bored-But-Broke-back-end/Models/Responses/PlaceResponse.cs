@@ -1,6 +1,6 @@
-﻿namespace Bored_But_Broke_back_end.Models
+﻿namespace Bored_But_Broke_back_end.Models.Responses
 {
-    public class Place
+    public class PlaceResponse
     {
         public string PlaceId { get; set; } = string.Empty;
         public string PlaceName { get; set; } = string.Empty;
@@ -12,6 +12,6 @@
         public double? Rating { get; set; }
         public string PlaceUrl { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
-        public ICollection<Favourite> Favourites { get; set; } = [];
+        public bool IsFavourited { get; set; }
     }
 }

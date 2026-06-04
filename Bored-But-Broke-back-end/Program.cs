@@ -26,6 +26,7 @@ namespace Bored_But_Broke_back_end
 
             builder.Services.AddScoped<IPlaceService, PlaceService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IFavouriteService, FavouriteService>();
             builder.Services.AddScoped<ILocationService, LocationService>();
             builder.Services.AddScoped<IWeatherService, WeatherService>();
             builder.Services.AddScoped<IYelpClient, YelpClient>();
