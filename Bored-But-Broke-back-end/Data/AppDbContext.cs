@@ -1,6 +1,7 @@
 ﻿using Bored_But_Broke_back_end.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace Bored_But_Broke_back_end.Data
 {
@@ -29,6 +30,17 @@ namespace Bored_But_Broke_back_end.Data
                     .WithMany(p => p.Favourites)
                     .HasForeignKey(f => f.PlaceId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<Place>(entity =>
+            {
+                entity.OwnsOne(e => e.Location);
+                entity.OwnsMany(e => e.Categories);
+                entity.OwnsOne(e => e.Coordinates);
+                entity.OwnsMany(e => e.OpeningHours, openingHoursBuilder =>
+                {
+                    openingHoursBuilder.OwnsMany(o => o.Hours);
+                });
             });
         }
     }
