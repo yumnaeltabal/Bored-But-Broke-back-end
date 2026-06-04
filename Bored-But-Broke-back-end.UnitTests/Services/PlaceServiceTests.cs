@@ -25,8 +25,8 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
             _mockLocationService = new Mock<ILocationService>();
             _mockWeatherService = new Mock<IWeatherService>();
             _placeService = new PlaceService(
-                _mockYelpClient.Object, 
-                _mockLocationService.Object, 
+                _mockYelpClient.Object,
+                _mockLocationService.Object,
                 _mockWeatherService.Object);
         }
 
@@ -34,7 +34,7 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
         public async Task GetPlacesAsync_ShouldReturnEmptyList_WhenClientSuccessfullyReturnNoResults()
         {
             var query = new GetPlacesQuery
-            { 
+            {
                 Location = "London"
             };
             var token = CancellationToken.None;
@@ -55,7 +55,7 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
             _mockYelpClient
                 .Setup(m => m.BusinessesSearchAsync(It.IsAny<Dictionary<string, StringValues>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(response);
-            
+
             var result = await _placeService.GetPlacesAsync(query, token);
 
             result.ShouldNotBeNull();
@@ -120,8 +120,8 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
             var categories = "water_activities";
             var ageRange = AgeRange.Over18;
 
-            var query = new GetPlacesQuery 
-            { 
+            var query = new GetPlacesQuery
+            {
                 Location = location,
                 Radius = radius,
                 Budget = price,
@@ -171,9 +171,9 @@ namespace Bored_But_Broke_back_end.UnitTests.Services
         [Test]
         public async Task GetPlacesAsync_ShouldThrowsException_WhenClientFails()
         {
-            var query = new GetPlacesQuery 
-            { 
-                Location = "London", 
+            var query = new GetPlacesQuery
+            {
+                Location = "London",
             };
             var token = CancellationToken.None;
 

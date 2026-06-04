@@ -25,7 +25,7 @@ namespace Bored_But_Broke_back_end.UnitTests.Controllers
         public async Task GetPlacesAsync_ShouldReturn200WithEmptyList_WhenServiceReturnsEmptyList()
         {
             GetPlacesQuery query = new GetPlacesQuery
-            { 
+            {
                 Location = "London"
             };
             var token = CancellationToken.None;
@@ -54,9 +54,9 @@ namespace Bored_But_Broke_back_end.UnitTests.Controllers
             };
             var token = CancellationToken.None;
 
-            List<Place> places = 
+            List<Place> places =
                 [
-                    new Place 
+                    new Place
                     {
                         PlaceId = "1",
                         PlaceName = "Sample Place"

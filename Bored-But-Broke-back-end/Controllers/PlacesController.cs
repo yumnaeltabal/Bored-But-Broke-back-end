@@ -38,7 +38,7 @@ namespace Bored_But_Broke_back_end.Controllers
                     modelStateDictionary: ModelState);
             }
 
-            var result = await _placeService.GetPlacesAsync(query, HttpContext, token);
+            var result = await _placeService.GetPlacesAsync(query, token);
 
             return Ok(result);
         }
@@ -48,7 +48,7 @@ namespace Bored_But_Broke_back_end.Controllers
         [OutputCache]
         public async Task<IActionResult> GetPlaceByIdAsync([FromRoute] string placeId, CancellationToken token)
         {
-            var result = await _placeService.GetPlaceByIdAsync(placeId, HttpContext, token);
+            var result = await _placeService.GetPlaceByIdAsync(placeId, token);
 
             return Ok(result);
         }

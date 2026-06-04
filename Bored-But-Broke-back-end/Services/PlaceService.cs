@@ -15,8 +15,8 @@ namespace Bored_But_Broke_back_end.Services
 {
     public interface IPlaceService
     {
-        Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, HttpContext context, CancellationToken ct);
-        Task<PlaceResponse> GetPlaceByIdAsync(string placeId, HttpContext context, CancellationToken ct);
+        Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, CancellationToken ct);
+        Task<PlaceResponse> GetPlaceByIdAsync(string placeId, CancellationToken ct);
     }
     public class PlaceService : IPlaceService
     {
@@ -41,20 +41,14 @@ namespace Bored_But_Broke_back_end.Services
         private readonly IYelpClient _yelpClient;
         private readonly ILocationService _locationService;
         private readonly IWeatherService _weatherService;
-        private readonly IFavouriteService _favouriteService;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public PlaceService(IYelpClient yelpClient, ILocationService locationService, 
-            IWeatherService weatherService, IFavouriteService favouriteService,
-            UserManager<ApplicationUser> userManager)
+        public PlaceService(IYelpClient yelpClient, ILocationService locationService, IWeatherService weatherService)
         {
             _yelpClient = yelpClient;
             _locationService = locationService;
             _weatherService = weatherService;
-            _favouriteService = favouriteService;
-            _userManager = userManager;
         }
-        public async Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, HttpContext context, CancellationToken token)
+        public async Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, CancellationToken token)
         {
 
             var coordinates = await _locationService.GetCoordinatesFromAddressAsync(query.Location, token)
@@ -108,17 +102,9 @@ namespace Bored_But_Broke_back_end.Services
 
             var places = response.ToPlaces();
 
-            var isFavouritedList = new bool[places.Count];
-            var userId = _userManager.GetUserId(context.User);
-
-            if (userId is not null) 
-            {
-                isFavouritedList = (bool[]) await _favouriteService.GetFavouriteStatusAsync(userId, places.Select(p => p.PlaceId));
-            }
-
             return new PlacesResponse
             {
-                Places = places.Zip(isFavouritedList, (p, f) => new PlaceResponse 
+                Places = places.Select(p => new PlaceResponse 
                 { 
                     PlaceId = p.PlaceId,
                     PlaceName = p.PlaceName,
@@ -129,27 +115,17 @@ namespace Bored_But_Broke_back_end.Services
                     OpeningHours = p.OpeningHours,
                     Rating = p.Rating,
                     PlaceUrl = p.PlaceUrl,
-                    ImageUrl = p.ImageUrl,
-                    IsFavourited = f 
+                    ImageUrl = p.ImageUrl
                 }).ToList(),
                 IsIndoor = isIndoor
             };
         }
-        public async Task<PlaceResponse> GetPlaceByIdAsync(string placeId, HttpContext context, CancellationToken token)
+        public async Task<PlaceResponse> GetPlaceByIdAsync(string placeId, CancellationToken token)
         {
             var business = await _yelpClient.BusinessesGetByIdAsync(placeId, token)
                 ?? throw new PlaceNotFoundException(placeId);
 
             var place = business.ToPlace();
-
-            bool isFavourited = false;
-            var userId = _userManager.GetUserId(context.User);
-
-            if (userId is not null)
-            {
-                var status = await _favouriteService.GetFavouriteStatusAsync(userId, [place.PlaceId]);
-                isFavourited = status.First();
-            }
 
             return new PlaceResponse
             {
@@ -162,8 +138,7 @@ namespace Bored_But_Broke_back_end.Services
                 OpeningHours = place.OpeningHours,
                 Rating = place.Rating,
                 PlaceUrl = place.PlaceUrl,
-                ImageUrl = place.ImageUrl,
-                IsFavourited = isFavourited
+                ImageUrl = place.ImageUrl
             };
         }
     }
