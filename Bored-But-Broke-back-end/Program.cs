@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Bored_But_Broke_back_end.Repositories;
 
 namespace Bored_But_Broke_back_end
 {
@@ -24,6 +25,8 @@ namespace Bored_But_Broke_back_end
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddScoped<IPlaceRepository, PlaceRepository>();
+            builder.Services.AddScoped<IFavouriteRepository, FavouriteRepository>();
             builder.Services.AddScoped<IPlaceService, PlaceService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IFavouriteService, FavouriteService>();

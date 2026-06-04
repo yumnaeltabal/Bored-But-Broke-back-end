@@ -37,7 +37,7 @@ namespace Bored_But_Broke_back_end.Controllers
             return Created();
         }
 
-        [HttpDelete("{placeId:string:length(22)}")]
+        [HttpDelete("{placeId:length(22)}")]
         public async Task<IActionResult> RemoveFavouriteAsync(string placeId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
