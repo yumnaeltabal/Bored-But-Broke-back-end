@@ -104,14 +104,14 @@ namespace Bored_But_Broke_back_end
             builder.Services.AddOutputCache(options =>
             {
                 options.AddPolicy("PlacesPolicy", policy => policy
-                    .Expire(TimeSpan.FromMinutes(5))
+                    .Expire(TimeSpan.FromMinutes(10))
                     .SetVaryByQuery("location", "radius", "date", 
                     "startTime", "endTime", "categories", 
                     "ageRange", "budget", "limit")
                 );
                 options.SizeLimit = 100 * 1024 * 1024;
                 options.MaximumBodySize = 2 * 1024 * 1024;
-                options.AddBasePolicy(policy => policy.Expire(TimeSpan.FromMinutes(5)));
+                options.AddBasePolicy(policy => policy.Expire(TimeSpan.FromMinutes(10)));
             });
 
             builder.Services.AddRateLimiter(options =>
