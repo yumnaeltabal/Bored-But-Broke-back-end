@@ -19,6 +19,7 @@ namespace Bored_But_Broke_back_end.Middlewares
                 BadHttpRequestException e => (e.StatusCode, "Bad Request", e.Message),
                 RegistrationFailedException e => (StatusCodes.Status400BadRequest, "Bad Request", e.Message),
                 FavouriteNotFoundException e => (StatusCodes.Status400BadRequest, "Bad Request", e.Message),
+                UserNotFoundException e => (StatusCodes.Status404NotFound, "Not Found", e.Message),
                 LoginUnsuccessfulException e => (StatusCodes.Status401Unauthorized, "Unauthorized", e.Message),
                 EmailAlreadyInUseException e => (StatusCodes.Status409Conflict, "Conflict", e.Message),
                 PlaceAlreadyFavouritedException e => (StatusCodes.Status409Conflict, "Conflict", e.Message),
