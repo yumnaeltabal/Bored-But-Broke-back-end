@@ -1,7 +1,9 @@
 ﻿using Bored_But_Broke_back_end.Models.Requests;
 using Bored_But_Broke_back_end.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace Bored_But_Broke_back_end.Controllers
@@ -18,7 +20,7 @@ namespace Bored_But_Broke_back_end.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlaceService>>> GetFavouritedPlacesAsync()
+        public async Task<IActionResult> GetFavouritedPlacesAsync()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -45,6 +47,32 @@ namespace Bored_But_Broke_back_end.Controllers
             await _favouriteService.RemoveFavouriteAsync(userId, placeId);
 
             return NoContent();
+        }
+
+        [HttpGet("status")]
+        public async Task<IActionResult> GetFavouriteStatusAsync([FromQuery] List<string> placeIds)
+        {
+            if (placeIds is null || placeIds.Count == 0)
+            {
+                ModelState.AddModelError(nameof(placeIds), "At least one place ID is required.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(e => e.Value?.Errors.Count > 0)
+                    .Select(e => $"{e.Key}: {string.Join(", ", e.Value!.Errors.Select(x => x.ErrorMessage))}")
+                    .ToList();
+
+                return ValidationProblem(
+                    detail: string.Join(" | ", errors),
+                    modelStateDictionary: ModelState);
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var result = await _favouriteService.GetFavouriteStatusAsync(userId, placeIds!);
+            return Ok(result);
         }
     }
 }
