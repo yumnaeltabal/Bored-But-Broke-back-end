@@ -2,6 +2,7 @@
 {
     public class PlacesResponse
     {
-        List<PlaceResponse> Places = [];
+        public List<PlaceResponse> Places { get; set; } = [];
+        public bool IsIndoor { get; set; }
     }
 }

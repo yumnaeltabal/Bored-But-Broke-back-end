@@ -38,16 +38,17 @@ namespace Bored_But_Broke_back_end.Controllers
                     modelStateDictionary: ModelState);
             }
 
-            var result = await _placeService.GetPlacesAsync(query, token);
+            var result = await _placeService.GetPlacesAsync(query, HttpContext, token);
 
             return Ok(result);
         }
+
         [HttpGet("{placeId:length(22)}")]
         [EnableRateLimiting("fixed")]
         [OutputCache]
         public async Task<IActionResult> GetPlaceByIdAsync([FromRoute] string placeId, CancellationToken token)
         {
-            var result = await _placeService.GetPlaceByIdAsync(placeId, token);
+            var result = await _placeService.GetPlaceByIdAsync(placeId, HttpContext, token);
 
             return Ok(result);
         }

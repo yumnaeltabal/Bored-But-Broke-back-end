@@ -4,16 +4,19 @@ using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.ExternalApis.Yelp.Extensions;
 using Bored_But_Broke_back_end.Models;
 using Bored_But_Broke_back_end.Models.Queries;
+using Bored_But_Broke_back_end.Models.Responses;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json;
 
 namespace Bored_But_Broke_back_end.Services
 {
     public interface IPlaceService
     {
-        Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken ct);
-        Task<Place> GetPlaceByIdAsync(string placeId, CancellationToken ct);
+        Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, HttpContext context, CancellationToken ct);
+        Task<PlaceResponse> GetPlaceByIdAsync(string placeId, HttpContext context, CancellationToken ct);
     }
     public class PlaceService : IPlaceService
     {
@@ -38,13 +41,20 @@ namespace Bored_But_Broke_back_end.Services
         private readonly IYelpClient _yelpClient;
         private readonly ILocationService _locationService;
         private readonly IWeatherService _weatherService;
-        public PlaceService(IYelpClient yelpClient, ILocationService locationService, IWeatherService weatherService)
+        private readonly IFavouriteService _favouriteService;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public PlaceService(IYelpClient yelpClient, ILocationService locationService, 
+            IWeatherService weatherService, IFavouriteService favouriteService,
+            UserManager<ApplicationUser> userManager)
         {
             _yelpClient = yelpClient;
             _locationService = locationService;
             _weatherService = weatherService;
+            _favouriteService = favouriteService;
+            _userManager = userManager;
         }
-        public async Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken token)
+        public async Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, HttpContext context, CancellationToken token)
         {
 
             var coordinates = await _locationService.GetCoordinatesFromAddressAsync(query.Location, token)
@@ -96,14 +106,65 @@ namespace Bored_But_Broke_back_end.Services
 
             var response = await _yelpClient.BusinessesSearchAsync(queryParams, token);
 
-            return response.ToPlaces();
+            var places = response.ToPlaces();
+
+            var isFavouritedList = new bool[places.Count];
+            var userId = _userManager.GetUserId(context.User);
+
+            if (userId is not null) 
+            {
+                isFavouritedList = (bool[]) await _favouriteService.GetFavouriteStatusAsync(userId, places.Select(p => p.PlaceId));
+            }
+
+            return new PlacesResponse
+            {
+                Places = places.Zip(isFavouritedList, (p, f) => new PlaceResponse 
+                { 
+                    PlaceId = p.PlaceId,
+                    PlaceName = p.PlaceName,
+                    Location = p.Location,
+                    Categories = p.Categories,
+                    Price = p.Price,
+                    Coordinates = p.Coordinates,
+                    OpeningHours = p.OpeningHours,
+                    Rating = p.Rating,
+                    PlaceUrl = p.PlaceUrl,
+                    ImageUrl = p.ImageUrl,
+                    IsFavourited = f 
+                }).ToList(),
+                IsIndoor = isIndoor
+            };
         }
-        public async Task<Place> GetPlaceByIdAsync(string placeId, CancellationToken token)
+        public async Task<PlaceResponse> GetPlaceByIdAsync(string placeId, HttpContext context, CancellationToken token)
         {
             var business = await _yelpClient.BusinessesGetByIdAsync(placeId, token)
                 ?? throw new PlaceNotFoundException(placeId);
 
-            return business.ToPlace();
+            var place = business.ToPlace();
+
+            bool isFavourited = false;
+            var userId = _userManager.GetUserId(context.User);
+
+            if (userId is not null)
+            {
+                var status = await _favouriteService.GetFavouriteStatusAsync(userId, [place.PlaceId]);
+                isFavourited = status.First();
+            }
+
+            return new PlaceResponse
+            {
+                PlaceId = place.PlaceId,
+                PlaceName = place.PlaceName,
+                Location = place.Location,
+                Categories = place.Categories,
+                Price = place.Price,
+                Coordinates = place.Coordinates,
+                OpeningHours = place.OpeningHours,
+                Rating = place.Rating,
+                PlaceUrl = place.PlaceUrl,
+                ImageUrl = place.ImageUrl,
+                IsFavourited = isFavourited
+            };
         }
     }
 
