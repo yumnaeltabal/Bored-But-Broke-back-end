@@ -14,7 +14,7 @@ namespace Bored_But_Broke_back_end.Services
         Task RegisterUserAsync(RegisterUserRequest request);
         Task LoginUserAsync(LoginUserRequest request);
         Task LogoutUserAsync();
-        Task<UserInfoResponse?> GetCurrentUserAsync(HttpContext context);
+        Task<UserInfoResponse> GetCurrentUserAsync(HttpContext context);
     }
     public class AuthService : IAuthService
     {
@@ -77,11 +77,11 @@ namespace Bored_But_Broke_back_end.Services
         {
             await _signInManager.SignOutAsync();
         }
-        public async Task<UserInfoResponse?> GetCurrentUserAsync(HttpContext context)
+        public async Task<UserInfoResponse> GetCurrentUserAsync(HttpContext context)
         {
             var user = await _userManager.GetUserAsync(context.User);
 
-            if (user is null) return null;
+            if (user is null) throw new UserNotFoundException();
 
             return new UserInfoResponse
             {

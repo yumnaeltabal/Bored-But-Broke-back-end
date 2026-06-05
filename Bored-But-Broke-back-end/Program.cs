@@ -1,19 +1,21 @@
 using Bored_But_Broke_back_end.Data;
 using Bored_But_Broke_back_end.ExternalApis.Geoapify;
 using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.HealthChecks;
 using Bored_But_Broke_back_end.Middlewares;
 using Bored_But_Broke_back_end.Models;
+using Bored_But_Broke_back_end.Repositories;
 using Bored_But_Broke_back_end.Services;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
-using System.Diagnostics;
-using System.Text.Json;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Diagnostics;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 
 namespace Bored_But_Broke_back_end
@@ -24,8 +26,11 @@ namespace Bored_But_Broke_back_end
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddScoped<IPlaceRepository, PlaceRepository>();
+            builder.Services.AddScoped<IFavouriteRepository, FavouriteRepository>();
             builder.Services.AddScoped<IPlaceService, PlaceService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IFavouriteService, FavouriteService>();
             builder.Services.AddScoped<ILocationService, LocationService>();
             builder.Services.AddScoped<IWeatherService, WeatherService>();
             builder.Services.AddScoped<IYelpClient, YelpClient>();
@@ -71,7 +76,17 @@ namespace Bored_But_Broke_back_end
 
             builder.Services.AddHealthChecks().AddCheck<ExternalApisHealthCheck>("External API Health Check");
             builder.Services.AddExceptionHandler<ExceptionHandler>();
-            builder.Services.AddProblemDetails();
+            builder.Services.AddProblemDetails(options =>
+                options.CustomizeProblemDetails = context =>
+                {
+                    if (context.HttpContext.Response.StatusCode == StatusCodes.Status401Unauthorized)
+                    {
+                        context.ProblemDetails.Detail = "You must login to view this";
+                        var traceId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
+                        context.ProblemDetails.Extensions["traceId"] = traceId;
+                    }
+                }
+            );
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -167,12 +182,9 @@ namespace Bored_But_Broke_back_end
 
             var app = builder.Build();
 
-            app.UseRouting();
-
-            app.UseOutputCache();
-            app.UseRateLimiter();
-
             app.UseExceptionHandler();
+            app.UseHttpsRedirection();
+            app.UseRouting();
 
             if (app.Environment.IsDevelopment())
             {
@@ -180,11 +192,12 @@ namespace Bored_But_Broke_back_end
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseCors("BBBFrontEnd");
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseOutputCache();
+            app.UseRateLimiter();
 
             app.MapControllers();
 

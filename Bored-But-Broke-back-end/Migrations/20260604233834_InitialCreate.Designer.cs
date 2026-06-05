@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bored_But_Broke_back_end.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260602224418_InitialCreate")]
+    [Migration("20260604233834_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -100,6 +100,61 @@ namespace Bored_But_Broke_back_end.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Bored_But_Broke_back_end.Models.Favourite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PlaceId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlaceId");
+
+                    b.HasIndex("UserId", "PlaceId")
+                        .IsUnique();
+
+                    b.ToTable("Favourites");
+                });
+
+            modelBuilder.Entity("Bored_But_Broke_back_end.Models.Place", b =>
+                {
+                    b.Property<string>("PlaceId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PlaceName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PlaceUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("Rating")
+                        .HasColumnType("float");
+
+                    b.HasKey("PlaceId");
+
+                    b.ToTable("Places");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -235,6 +290,188 @@ namespace Bored_But_Broke_back_end.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Bored_But_Broke_back_end.Models.Favourite", b =>
+                {
+                    b.HasOne("Bored_But_Broke_back_end.Models.Place", "Place")
+                        .WithMany("Favourites")
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Bored_But_Broke_back_end.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Place");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Bored_But_Broke_back_end.Models.Place", b =>
+                {
+                    b.OwnsMany("Bored_But_Broke_back_end.Models.Category", "Categories", b1 =>
+                        {
+                            b1.Property<string>("PlaceId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Alias")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Title")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("PlaceId", "Id");
+
+                            b1.ToTable("Category");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlaceId");
+                        });
+
+                    b.OwnsOne("Bored_But_Broke_back_end.Models.Coordinates", "Coordinates", b1 =>
+                        {
+                            b1.Property<string>("PlaceId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<double?>("Latitude")
+                                .HasColumnType("float");
+
+                            b1.Property<double?>("Longitude")
+                                .HasColumnType("float");
+
+                            b1.HasKey("PlaceId");
+
+                            b1.ToTable("Places");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlaceId");
+                        });
+
+                    b.OwnsOne("Bored_But_Broke_back_end.Models.Location", "Location", b1 =>
+                        {
+                            b1.Property<string>("PlaceId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<string>("Address1")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Address2")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Address3")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Country")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("DisplayAddress")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("State")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("ZipCode")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("PlaceId");
+
+                            b1.ToTable("Places");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlaceId");
+                        });
+
+                    b.OwnsMany("Bored_But_Broke_back_end.Models.OpeningHours", "OpeningHours", b1 =>
+                        {
+                            b1.Property<string>("PlaceId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("HoursType")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<bool?>("IsOpenNow")
+                                .HasColumnType("bit");
+
+                            b1.HasKey("PlaceId", "Id");
+
+                            b1.ToTable("OpeningHours");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlaceId");
+
+                            b1.OwnsMany("Bored_But_Broke_back_end.Models.Hour", "Hours", b2 =>
+                                {
+                                    b2.Property<string>("OpeningHoursPlaceId")
+                                        .HasColumnType("nvarchar(450)");
+
+                                    b2.Property<int>("OpeningHoursId")
+                                        .HasColumnType("int");
+
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("int");
+
+                                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b2.Property<int>("Id"));
+
+                                    b2.Property<int?>("Day")
+                                        .HasColumnType("int");
+
+                                    b2.Property<string>("End")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)");
+
+                                    b2.Property<string>("Start")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)");
+
+                                    b2.HasKey("OpeningHoursPlaceId", "OpeningHoursId", "Id");
+
+                                    b2.ToTable("Hour");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("OpeningHoursPlaceId", "OpeningHoursId");
+                                });
+
+                            b1.Navigation("Hours");
+                        });
+
+                    b.Navigation("Categories");
+
+                    b.Navigation("Coordinates");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("OpeningHours");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -284,6 +521,11 @@ namespace Bored_But_Broke_back_end.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Bored_But_Broke_back_end.Models.Place", b =>
+                {
+                    b.Navigation("Favourites");
                 });
 #pragma warning restore 612, 618
         }

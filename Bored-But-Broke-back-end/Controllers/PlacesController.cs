@@ -42,16 +42,14 @@ namespace Bored_But_Broke_back_end.Controllers
 
             return Ok(result);
         }
+
         [HttpGet("{placeId:length(22)}")]
         [EnableRateLimiting("fixed")]
         [OutputCache]
         public async Task<IActionResult> GetPlaceByIdAsync([FromRoute] string placeId, CancellationToken token)
         {
             var result = await _placeService.GetPlaceByIdAsync(placeId, token);
-            if (result == null)
-            {
-                return NotFound();
-            }
+
             return Ok(result);
         }
     }

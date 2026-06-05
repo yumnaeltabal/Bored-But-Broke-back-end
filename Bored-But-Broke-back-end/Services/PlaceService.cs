@@ -1,18 +1,22 @@
-﻿using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
+﻿using Bored_But_Broke_back_end.Exceptions;
+using Bored_But_Broke_back_end.ExternalApis.OpenMeteo;
 using Bored_But_Broke_back_end.ExternalApis.Yelp;
 using Bored_But_Broke_back_end.ExternalApis.Yelp.Extensions;
 using Bored_But_Broke_back_end.Models;
 using Bored_But_Broke_back_end.Models.Queries;
+using Bored_But_Broke_back_end.Models.Responses;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json;
 
 namespace Bored_But_Broke_back_end.Services
 {
     public interface IPlaceService
     {
-        Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken ct);
-        Task<Place> GetPlaceByIdAsync(string placeId, CancellationToken ct);
+        Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, CancellationToken ct);
+        Task<PlaceResponse> GetPlaceByIdAsync(string placeId, CancellationToken ct);
     }
     public class PlaceService : IPlaceService
     {
@@ -37,13 +41,14 @@ namespace Bored_But_Broke_back_end.Services
         private readonly IYelpClient _yelpClient;
         private readonly ILocationService _locationService;
         private readonly IWeatherService _weatherService;
+
         public PlaceService(IYelpClient yelpClient, ILocationService locationService, IWeatherService weatherService)
         {
             _yelpClient = yelpClient;
             _locationService = locationService;
             _weatherService = weatherService;
         }
-        public async Task<List<Place>> GetPlacesAsync(GetPlacesQuery query, CancellationToken token)
+        public async Task<PlacesResponse> GetPlacesAsync(GetPlacesQuery query, CancellationToken token)
         {
 
             var coordinates = await _locationService.GetCoordinatesFromAddressAsync(query.Location, token)
@@ -95,12 +100,46 @@ namespace Bored_But_Broke_back_end.Services
 
             var response = await _yelpClient.BusinessesSearchAsync(queryParams, token);
 
-            return response.ToPlaces();
+            var places = response.ToPlaces();
+
+            return new PlacesResponse
+            {
+                Places = places.Select(p => new PlaceResponse 
+                { 
+                    PlaceId = p.PlaceId,
+                    PlaceName = p.PlaceName,
+                    Location = p.Location,
+                    Categories = p.Categories,
+                    Price = p.Price,
+                    Coordinates = p.Coordinates,
+                    OpeningHours = p.OpeningHours,
+                    Rating = p.Rating,
+                    PlaceUrl = p.PlaceUrl,
+                    ImageUrl = p.ImageUrl
+                }).ToList(),
+                IsIndoor = isIndoor
+            };
         }
-        public async Task<Place> GetPlaceByIdAsync(string placeId, CancellationToken token)
+        public async Task<PlaceResponse> GetPlaceByIdAsync(string placeId, CancellationToken token)
         {
-            var business = await _yelpClient.BusinessesGetByIdAsync(placeId, token);
-            return business.ToPlace();
+            var business = await _yelpClient.BusinessesGetByIdAsync(placeId, token)
+                ?? throw new PlaceNotFoundException(placeId);
+
+            var place = business.ToPlace();
+
+            return new PlaceResponse
+            {
+                PlaceId = place.PlaceId,
+                PlaceName = place.PlaceName,
+                Location = place.Location,
+                Categories = place.Categories,
+                Price = place.Price,
+                Coordinates = place.Coordinates,
+                OpeningHours = place.OpeningHours,
+                Rating = place.Rating,
+                PlaceUrl = place.PlaceUrl,
+                ImageUrl = place.ImageUrl
+            };
         }
     }
 

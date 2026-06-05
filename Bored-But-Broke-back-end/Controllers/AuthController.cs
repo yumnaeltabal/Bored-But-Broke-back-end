@@ -47,8 +47,6 @@ namespace Bored_But_Broke_back_end.Controllers
         {
             var user = await _authService.GetCurrentUserAsync(HttpContext);
 
-            if (user is null) return Unauthorized("The user does not exist");
-
             return Ok(user);
         }
     }
