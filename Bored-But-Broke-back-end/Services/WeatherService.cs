@@ -39,7 +39,7 @@ namespace Bored_But_Broke_back_end.Services
                 }
                 totalHours++;
 
-               if (weather.hourly.weather_code[index] > 51)
+               if (weather.hourly.weather_code[index] >= 51)
                 {
                     badHours++;
                 }
