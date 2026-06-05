@@ -182,12 +182,9 @@ namespace Bored_But_Broke_back_end
 
             var app = builder.Build();
 
-            app.UseRouting();
-
-            app.UseOutputCache();
-            app.UseRateLimiter();
-
             app.UseExceptionHandler();
+            app.UseHttpsRedirection();
+            app.UseRouting();
 
             if (app.Environment.IsDevelopment())
             {
@@ -195,12 +192,12 @@ namespace Bored_But_Broke_back_end
                 app.UseSwaggerUI();
             }
 
-            app.UseStatusCodePages();
-            app.UseHttpsRedirection();
-
             app.UseCors("BBBFrontEnd");
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseOutputCache();
+            app.UseRateLimiter();
 
             app.MapControllers();
 

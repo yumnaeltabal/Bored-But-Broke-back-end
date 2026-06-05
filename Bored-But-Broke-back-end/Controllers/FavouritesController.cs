@@ -33,7 +33,8 @@ namespace Bored_But_Broke_back_end.Controllers
         public async Task<IActionResult> AddFavouriteAsync([FromBody] AddFavouriteRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
+            Console.WriteLine(userId);
+            Console.WriteLine(request.PlaceId);
             await _favouriteService.AddFavouriteAsync(userId, request);
 
             return Created();
@@ -43,7 +44,8 @@ namespace Bored_But_Broke_back_end.Controllers
         public async Task<IActionResult> RemoveFavouriteAsync(string placeId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
+            Console.WriteLine(userId);
+            Console.WriteLine(placeId);
             await _favouriteService.RemoveFavouriteAsync(userId, placeId);
 
             return NoContent();
@@ -70,8 +72,10 @@ namespace Bored_But_Broke_back_end.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
+            Console.WriteLine(userId);
+            Console.WriteLine(placeIds[0]);
             var result = await _favouriteService.GetFavouriteStatusAsync(userId, placeIds!);
+            Console.WriteLine(result.First());
             return Ok(result);
         }
     }

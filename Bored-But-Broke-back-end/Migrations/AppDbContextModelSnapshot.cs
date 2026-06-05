@@ -134,7 +134,6 @@ namespace Bored_But_Broke_back_end.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PlaceName")
@@ -142,7 +141,6 @@ namespace Bored_But_Broke_back_end.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PlaceUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Price")
@@ -464,11 +462,9 @@ namespace Bored_But_Broke_back_end.Migrations
 
                     b.Navigation("Categories");
 
-                    b.Navigation("Coordinates")
-                        .IsRequired();
+                    b.Navigation("Coordinates");
 
-                    b.Navigation("Location")
-                        .IsRequired();
+                    b.Navigation("Location");
 
                     b.Navigation("OpeningHours");
                 });
